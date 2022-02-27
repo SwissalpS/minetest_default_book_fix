@@ -3,6 +3,8 @@ local S = default.get_translator
 local esc = minetest.formspec_escape
 local formspec_size = "size[8,8]"
 
+local wield_index_cache = {}
+
 local function formspec_core(tab)
 	if tab == nil then tab = 1 else tab = tostring(tab) end
 	return "tabheader[0,0;book_header;" ..
@@ -46,6 +48,7 @@ local function book_on_use_fix(itemstack, user)
 	local meta = itemstack:get_meta()
 	local title, text, owner = "", "", player_name
 	local page, page_max, lines, string = 1, 1, {}, ""
+	wield_index_cache[player_name] = user:get_wield_index()
 
 	-- Backwards compatibility
 	local old_data = minetest.deserialize(itemstack:get_metadata())
@@ -95,9 +98,16 @@ local max_title_size = 80
 local short_title_size = 35
 minetest.register_on_player_receive_fields(function(player, formname, fields)
 	if formname ~= "default:bookfix" then return end
+
 	local player_name = player:get_player_name()
 	local inv = player:get_inventory()
-	local stack = player:get_wielded_item()
+	local wield_index = wield_index_cache[player_name]
+	wield_index_cache[player_name] = nil
+	local stack = inv:get_stack("main", wield_index)
+
+	-- did player manage to drop item while formspec was loading?
+	if stack:is_empty() then return end
+
 	local data = stack:get_meta():to_table().fields
 
 	local title = data.title or ""
@@ -190,7 +200,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	end
 
 	-- Update stack
-	player:set_wielded_item(stack)
+	inv:set_stack("main", wield_index, stack)
 end)
 
 
