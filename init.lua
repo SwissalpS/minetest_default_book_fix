@@ -1,3 +1,5 @@
+-- most of this code is copied from minetest default game
+-- https://github.com/minetest/minetest_game/blob/240f9a6a8527d71376839d9efac70db9a6dd6566/mods/default/craftitems.lua
 local S = default.get_translator
 
 local esc = minetest.formspec_escape
