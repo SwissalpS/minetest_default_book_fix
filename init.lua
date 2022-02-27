@@ -213,3 +213,5 @@ minetest.override_item('default:book_written', {
 	on_use = book_on_use_fix
 })
 
+print('[default_book_fix] loaded')
+
